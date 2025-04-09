@@ -12,6 +12,7 @@ import PrimeVue from 'primevue/config';
 import 'primeicons/primeicons.css';
 // import 'primeflex/primeflex.css';
 import Aura from '@primeuix/themes/aura';
+import ToastService from 'primevue/toastservice';
 
 
 // Extend ImportMeta interface for Vite...
@@ -45,6 +46,7 @@ createInertiaApp({
                         cssLayer: false,
                     }
                 }})
+            .use(ToastService)
             .mount(el);
     },
     progress: {

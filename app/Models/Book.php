@@ -14,6 +14,6 @@ class Book extends Model
         'penerbit',
         'tahun_terbit',
         'kategori',
-        'stok'
+        'stok',
     ];
 }
