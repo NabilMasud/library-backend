@@ -15,9 +15,10 @@ Route::get('dashboard', function () {
 Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
     Route::post('/books', [BookController::class, 'store'])->name('books.store');
-    Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
-    Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
-    Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
+    // Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
+    // Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
+    // Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
+    Route::resource('/books', BookController::class)->except(['create', 'show', 'store']);
 });
 
 require __DIR__.'/settings.php';

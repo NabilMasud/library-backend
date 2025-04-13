@@ -7,6 +7,7 @@ import { type BreadcrumbItem } from '@/types';
 import Heading from '@/components/Heading.vue';
 
 import Dialog from 'primevue/dialog';
+import SplitButton from 'primevue/splitbutton';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
@@ -20,7 +21,10 @@ import { ref } from 'vue';
 
 const showModal = ref(false);
 
+const isEditing = ref(false)
+
 const form = ref({
+    id: null,
     judul: '',
     pengarang: '',
     penerbit: '',
@@ -30,54 +34,155 @@ const form = ref({
     stok: 0,
 })
 
+function tambahBuku() {
+    isEditing.value = false
+    form.value = {
+        id: null,
+        judul: '',
+        pengarang: '',
+        penerbit: '',
+        tahun_terbit_bef: new Date(),
+        tahun_terbit: '',
+        kategori: '',
+        stok: 0,
+    }
+    showModal.value = true
+}
+
+function editBuku(buku: any) {
+    isEditing.value = true
+    console.log(buku)
+    // form.value = { ...buku }
+    form.value = {
+        id: buku.id,
+        judul: buku.judul,
+        pengarang: buku.pengarang,
+        penerbit: buku.penerbit,
+        tahun_terbit_bef: new Date(buku.tahun_terbit),
+        tahun_terbit: '',
+        kategori: buku.kategori,
+        stok: buku.stok,
+    }
+    showModal.value = true
+}
+
+const items = (rowData: any) => [
+    {
+        label: 'Edit',
+        icon: 'pi pi-pencil',
+        severity: 'warn',
+        command: () => {
+            editBuku(rowData);
+        },
+    },
+    {
+        label: 'Hapus',
+        icon: 'pi pi-trash',
+        severity: 'danger',
+        command: () => {
+            confirmHapusBuku(rowData.id);
+        },
+    },
+];
+
+const showData = (item: any) => {
+    console.log(item);
+}
+
 const toast = useToast();
 
 const submit = () => {
-    toast.add({
-        severity: 'info',
-        summary: 'Loading',
-        detail: 'Sedang menambahkan buku...',
-        life: 3000,
-    })
-    form.value.tahun_terbit = form.value.tahun_terbit_bef.getFullYear().toString(); // Assign the year string to the new property
-    router.post('/books', form.value, {
-        onSuccess: () => {
-            toast.add({
-                severity: 'success',
-                summary: 'Berhasil',
-                detail: 'Buku berhasil ditambahkan',
-                life: 3000,
-            })
-            showModal.value = false
-            form.value = {
-                judul: '',
-                pengarang: '',
-                penerbit: '',
-                tahun_terbit_bef: new Date(),
-                tahun_terbit: '',
-                kategori: '',
-                stok: 0,
-            }
-        },
-        onError: (errors) => {
-            // toast.add({
-            //     severity: 'error',
-            //     summary: 'Gagal',
-            //     detail: errors,
-            //     life: 3000,
-            // })
-            const allErrors = Object.values(errors).flat();
-            allErrors.forEach((error: string) => {
+    if (isEditing.value) {
+        form.value.tahun_terbit = form.value.tahun_terbit_bef.getFullYear().toString();
+        toast.add({
+            severity: 'info',
+            summary: 'Loading',
+            detail: 'Sedang mengupdate buku...',
+            life: 3000,
+        })
+        router.put(`/books/${form.value.id}`, form.value, {
+            onSuccess: () => {
+                toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Buku diupdate', life: 3000 })
+                showModal.value = false
+            },
+            onError: (errors) => {
+                const allErrors = Object.values(errors).flat();
+                allErrors.forEach((error: string) => {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Gagal',
+                        detail: error,
+                        life: 3000,
+                    })
+                });
+                console.log(errors)
+            },
+        })
+    } else {
+        toast.add({
+            severity: 'info',
+            summary: 'Loading',
+            detail: 'Sedang menambahkan buku...',
+            life: 3000,
+        })
+        form.value.tahun_terbit = form.value.tahun_terbit_bef.getFullYear().toString(); // Assign the year string to the new property
+        router.post('/books', form.value, {
+            onSuccess: () => {
                 toast.add({
-                    severity: 'error',
-                    summary: 'Gagal',
-                    detail: error,
+                    severity: 'success',
+                    summary: 'Berhasil',
+                    detail: 'Buku berhasil ditambahkan',
                     life: 3000,
                 })
+                showModal.value = false
+                form.value = {
+                    id: null,
+                    judul: '',
+                    pengarang: '',
+                    penerbit: '',
+                    tahun_terbit_bef: new Date(),
+                    tahun_terbit: '',
+                    kategori: '',
+                    stok: 0,
+                }
+            },
+            onError: (errors) => {
+                const allErrors = Object.values(errors).flat();
+                allErrors.forEach((error: string) => {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Gagal',
+                        detail: error,
+                        life: 3000,
+                    })
+                });
+                console.log(errors)
+            },
+        })
+    }
+    router.reload({only: ['books']});
+}
+
+function confirmHapusBuku(id : number) {
+  if (confirm('Yakin ingin menghapus buku ini?')) {
+    router.delete(`/books/${id}`, {
+      onSuccess: () => {
+        toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Buku dihapus', life: 3000 })
+      },
+        onError: (errors) => {
+            const allErrors = Object.values(errors).flat();
+            allErrors.forEach((error: string) => {
+            toast.add({
+                severity: 'error',
+                summary: 'Gagal',
+                detail: error,
+                life: 3000,
+            })
             });
             console.log(errors)
         },
     })
+  }
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -85,6 +190,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         title: 'Books',
         href: '/books',
     },
+
 ];
 
 
@@ -102,7 +208,7 @@ defineProps({
             <Heading title="Daftar Buku" description="Berikut adalah daftar buku yang tersedia." />
 
             <div class="flex flex-1 flex-col gap-4 rounded-xl p-4">
-                <Button label="Tambah Buku" icon="pi pi-plus" @click="showModal = true" />
+                <Button label="Tambah Buku" icon="pi pi-plus" @click="tambahBuku" variant="outlined" class="w-48" />
                 <div
                     class="relative  flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
                     <DataTable :value="books" removableSort paginator :rows="10" responsiveLayout="scroll"
@@ -113,11 +219,21 @@ defineProps({
                         <Column field="tahun_terbit" header="Tahun"></Column>
                         <Column field="kategori" header="Kategori"></Column>
                         <Column field="stok" header="Stok"></Column>
+                        <Column header="Aksi">
+                            <!-- <template #body="slotProps"> -->
+                                <!-- <Button icon="pi pi-pencil" severity="info" @click="editBuku(slotProps.data)" />
+                                <Button icon="pi pi-trash" severity="danger" class="ml-2"
+                                @click="confirmHapusBuku(slotProps.data.id)" /> -->
+                            <!-- </template> -->
+                             <template #body="slotProps">
+                                <SplitButton label="Show" icon="pi-eye" :model="items(slotProps.data)" @click="showData(slotProps.data)" outlined severity="primary" size="small"></SplitButton>
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
             </div>
             <!-- Modal Tambah Buku -->
-            <Dialog header="Tambah Buku" v-model:visible="showModal" modal class="w-[30rem]">
+            <Dialog :header="isEditing ? 'Edit Buku' : 'Tambah Buku'" v-model:visible="showModal" modal class="w-[30rem]">
                 <div class="flex flex-col gap-4">
                     <div>
                         <label>Judul</label>
@@ -147,7 +263,7 @@ defineProps({
                 </div>
                 <template #footer>
                     <Button label="Batal" severity="secondary" @click="showModal = false" />
-                    <Button label="Simpan" @click="submit" />
+                    <Button :label="isEditing ? 'Update' : 'Simpan'" @click="submit" />
                 </template>
             </Dialog>
 
