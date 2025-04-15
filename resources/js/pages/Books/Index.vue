@@ -5,17 +5,20 @@ import Column from 'primevue/column'
 import { Head } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import Heading from '@/components/Heading.vue';
-
 import Dialog from 'primevue/dialog';
 import SplitButton from 'primevue/splitbutton';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
+import SelectButton from 'primevue/selectbutton';
 import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Image from 'primevue/image';
 import Skeleton from 'primevue/skeleton';
+import Rating from 'primevue/rating';
+import Tag from 'primevue/tag';
+import Divider from 'primevue/divider';
 
 import { router } from '@inertiajs/vue3';
 
@@ -184,7 +187,6 @@ const submit = () => {
         })
     }
     isLoading.value = false
-    router.reload({ only: ['books'] });
 }
 
 function confirmHapusBuku(id: number) {
@@ -206,6 +208,7 @@ function confirmHapusBuku(id: number) {
                 console.log(errors)
             },
         })
+        router.push({ url: '/books' });
     }
 }
 
@@ -216,7 +219,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 
 ];
-
 
 defineProps({
     books: Array
@@ -244,11 +246,6 @@ defineProps({
                         <Column field="kategori" header="Kategori"></Column>
                         <Column field="stok" header="Stok"></Column>
                         <Column header="Aksi">
-                            <!-- <template #body="slotProps"> -->
-                            <!-- <Button icon="pi pi-pencil" severity="info" @click="editBuku(slotProps.data)" />
-                                <Button icon="pi pi-trash" severity="danger" class="ml-2"
-                                @click="confirmHapusBuku(slotProps.data.id)" /> -->
-                            <!-- </template> -->
                             <template #body="slotProps">
                                 <SplitButton label="Show" icon="pi-eye" :model="items(slotProps.data)"
                                     @click="showData(slotProps.data)" outlined severity="primary" size="small">
@@ -276,7 +273,7 @@ defineProps({
                     </div>
                     <div>
                         <label>Kategori</label>
-                        <InputText v-model="form.kategori" class="w-full" />
+                        <SelectButton v-model="form.kategori" :options="['Novel', 'Komik', 'Majalah']" class="w-full" />
                     </div>
                     <div>
                         <label>Tahun Terbit</label>
@@ -331,7 +328,7 @@ defineProps({
                         <Skeleton v-if="!imageLoaded" width="100%" height="100%"></Skeleton>
                         <Image v-show="imageLoaded"
                             src="https://img.freepik.com/free-vector/hand-drawn-w-colours-illustration_23-2149852153.jpg?t=st=1744653355~exp=1744656955~hmac=8496290d360c18be73d0fb6441b9ebbf6329d7662e60ef68a38c62c713227700&w=740"
-                            alt="Cover Buku" imageStyle="border-radius: 0.5rem" preview @load="imageLoaded = true" />
+                            alt="Cover Buku" imageStyle="border-radius: 0.5rem" preview @load="imageLoaded = true" @error="imageLoaded = true" />
                     </div>
 
                     <!-- Info Buku -->
@@ -379,6 +376,9 @@ defineProps({
                         culpa qui officia deserunt mollit anim id est laborum.
                     </p>
                 </div>
+                <template #footer>
+                    <Button label="Tutup" @click="showDetailModal = false" severity="contrast" variant="text" class="w-full mt-4" />
+                </template>
             </Dialog>
 
 
