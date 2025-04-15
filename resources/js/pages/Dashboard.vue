@@ -22,7 +22,7 @@ function goToBooks() {
 const props = defineProps<{
     totalBuku: Number,
     stokKosong: Number,
-    bukuTerbaru: Array<{ id: number; judul: string; kategori: string; stok: string }>,
+    bukuTerbaru: { id: number; judul: string; kategori: string; stok: string }[],
     semingguTerakhir: Number,
     bukuPerKategori: { kategori: string; total: number }[],
 }>();
