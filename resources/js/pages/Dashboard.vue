@@ -19,11 +19,11 @@ function goToBooks() {
     router.visit('/books');
 }
 
-const props = defineProps<{
-    totalBuku: Number,
-    stokKosong: Number,
+defineProps<{
+    totalBuku: number,
+    stokKosong: number,
     bukuTerbaru: { id: number; judul: string; kategori: string; stok: string }[],
-    semingguTerakhir: Number,
+    semingguTerakhir: number,
     bukuPerKategori: { kategori: string; total: number }[],
 }>();
 </script>

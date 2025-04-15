@@ -8,7 +8,9 @@ import { DefineComponent } from 'vue';
 
 // Extend globalThis to include the route property
 declare global {
-    var rute: (name: string, params?: any, absolute?: boolean) => string;
+    interface GlobalThis {
+        rute: (name: string, params?: any, absolute?: boolean) => string;
+    }
 }
 
 
@@ -46,7 +48,11 @@ createServer((page) =>
 
             // Make route function available globally for SSR...
             if (typeof window === 'undefined') {
-                globalThis.rute = route;
+                Object.defineProperty(globalThis, 'rute', {
+                    value: route,
+                    writable: true,
+                    configurable: true,
+                });
             }
 
             app.use(plugin);
