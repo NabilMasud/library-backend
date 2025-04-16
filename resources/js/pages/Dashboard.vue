@@ -7,6 +7,7 @@ import Button from 'primevue/button';
 import DataView from 'primevue/dataview';
 import { router } from '@inertiajs/vue3';
 import Chart from 'primevue/chart';
+import Tag from 'primevue/tag';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,6 +26,7 @@ defineProps<{
     bukuTerbaru: { id: number; judul: string; kategori: string; stok: string }[],
     semingguTerakhir: number,
     bukuPerKategori: { kategori: string; total: number }[],
+    bukuStokSedikit: any[];
 }>();
 </script>
 
@@ -79,23 +81,49 @@ defineProps<{
                         </div>
                     </template>
                     <template #content>
-                        <Chart type="bar" :data="{
-                            labels: bukuPerKategori.map(item => item.kategori),
-                            datasets: [
-                                {
-                                    label: 'Jumlah Buku',
-                                    backgroundColor: '#3B82F6',
-                                    data: bukuPerKategori.map(item => item.total)
+                        <div class="flex items-center h-[300px]">
+                            <Chart type="bar" :data="{
+                                labels: bukuPerKategori.map(item => item.kategori),
+                                datasets: [
+                                    {
+                                        label: 'Jumlah Buku',
+                                        backgroundColor: '#3B82F6',
+                                        data: bukuPerKategori.map(item => item.total)
+                                    }
+                                ]
+                            }" :options="{
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
                                 }
-                            ]
-                        }" :options="{
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    display: false
-                                }
-                            }
-                        }" style="height: 300px" />
+                            }" style="height: 240px; width: 100%;" />
+                        </div>
+                    </template>
+                </Card>
+                <Card class="col-span-1">
+                    <template #title>
+                        <div class="flex justify-between">
+                            <div>Buku Stok Paling Sedikit</div>
+                            <div>
+                                <Button label="Lihat Semua" icon="pi pi-arrow-right" class="p-button-text"
+                                    @click="goToBooks"></Button>
+                            </div>
+                        </div>
+                    </template>
+                    <template #content>
+                        <ul class="divide-y divide-zinc-300 dark:divide-zinc-700">
+                            <li v-for="(item, index) in bukuStokSedikit" :key="index" class="py-3 flex justify-between">
+                                <div>
+                                    <div class="text-zinc-900 dark:text-zinc-100 font-medium">{{ item.judul }}</div>
+                                    <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ item.kategori }}</div>
+                                </div>
+                                <!-- <div :class="[item.stok == 0 ? 'text-red-600' : 'text-zinc-100', 'font-bold']">{{ item.stok == 0 ? 'Stok Habis' : 'Stok : ' + item.stok }}</div> -->
+                                <Tag v-if="item.stok == 0" class="ml-2" severity="danger" icon="pi pi-exclamation-triangle" rounded >Stok Habis</Tag>
+                                <Tag v-else class="ml-2" severity="info" rounded>Tersedia : {{ item.stok }}</Tag>
+                            </li>
+                        </ul>
                     </template>
                 </Card>
                 <Card class="col-span-2">
@@ -141,12 +169,17 @@ defineProps<{
                                                     </div>
                                                 </div>
                                                 <div class="flex flex-col md:items-end gap-8">
-                                                    <span class="text-xl font-semibold"><strong>Tersedia : </strong>{{
-                                                        item.stok }}</span>
+                                                    <Tag
+                                                        v-if="item.stok == 0" class="ml-2" severity="danger"
+                                                        icon="pi pi-exclamation-triangle" rounded>Stok Habis</Tag>
+                                                    <Tag
+                                                        v-else class="ml-2" severity="info" rounded>Tersedia :
+                                                        {{ item.stok }}</Tag>
+                                                    <!-- <span :class="[item.stok == 0? 'text-red-600' : 'text-zinc-100','text-xl font-semibold']">{{item.stok == 0 ? 'Stok Habis' : 'Tersedia : ' + item.stok }}</span> -->
                                                     <div class="flex flex-row-reverse md:flex-row gap-2">
                                                         <Button icon="pi pi-heart" outlined></Button>
                                                         <Button icon="pi pi-shopping-cart" label="Buy Now"
-                                                            :disabled="item.stok === 'OUTOFSTOCK'"
+                                                            :disabled="item.stok === 0"
                                                             class="flex-auto md:flex-initial whitespace-nowrap"></Button>
                                                     </div>
                                                 </div>

@@ -20,12 +20,15 @@ class DashboardController extends Controller
         ->groupBy('kategori')
         ->get();
 
+        $bukuStokSedikit = Book::orderBy('stok', 'asc')->take(5)->get();
+
         return Inertia::render('Dashboard', [
             'totalBuku' => $totalBuku,
             'stokKosong' => $totalStokKosong,
             'bukuTerbaru' => $bukuTerbaru,
             'semingguTerakhir' => $semingguTerakhir,
             'bukuPerKategori' => $bukuPerKategori,
+            'bukuStokSedikit' => $bukuStokSedikit,
         ]);
     }
 }

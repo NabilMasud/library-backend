@@ -244,10 +244,15 @@ defineProps({
                         <Column field="penerbit" header="Penerbit"></Column>
                         <Column field="tahun_terbit" header="Tahun"></Column>
                         <Column field="kategori" header="Kategori"></Column>
-                        <Column field="stok" header="Stok"></Column>
+                        <Column field="stok" header="Stok">
+                            <template #body="slotProps">
+                                <span v-if="slotProps.data.stok === 0" class="text-red-500 font-semibold">Habis</span>
+                                <span v-else>{{ slotProps.data.stok }}</span>
+                            </template>
+                        </Column>
                         <Column header="Aksi">
                             <template #body="slotProps">
-                                <SplitButton label="Show" icon="pi-eye" :model="items(slotProps.data)"
+                                <SplitButton label="Show" icon="pi pi-eye" :model="items(slotProps.data)"
                                     @click="showData(slotProps.data)" outlined severity="primary" size="small">
                                 </SplitButton>
                             </template>
@@ -341,7 +346,8 @@ defineProps({
 
                         <div class="mb-2">
                             <Tag severity="info" :value="detailData.kategori" class="mr-2" />
-                            <Tag severity="success" :value="detailData.stok + ' Stok'" />
+                            <Tag v-if="detailData.stok != 0" severity="success" :value="detailData.stok + ' Stok'" />
+                            <Tag v-else severity="danger" value="Stok Habis" />
                         </div>
 
                         <!-- Rating (jika ada) -->
