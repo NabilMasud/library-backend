@@ -5,8 +5,11 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { Book, BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import useRole from '@/composables/useRole';
+
+const { hasRole } = useRole();
 
 const mainNavItems: NavItem[] = [
     {
@@ -14,11 +17,29 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
-    {
-        title: 'Books',
-        href: '/books',
-        icon: LayoutGrid,
-    },
+    ...(hasRole('Petugas')
+        ? [
+            {
+                title: 'Books',
+                href: '/books',
+                icon: Book,
+            },
+        ]
+        : []),
+    ...(hasRole('Admin')
+        ? [
+            {
+                title: 'Users',
+                href: '/users',
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Roles',
+                href: '/roles',
+                icon: LayoutGrid,
+            },
+        ]
+        : []),
 ];
 
 const footerNavItems: NavItem[] = [

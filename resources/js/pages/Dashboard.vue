@@ -8,6 +8,8 @@ import DataView from 'primevue/dataview';
 import { router } from '@inertiajs/vue3';
 import Chart from 'primevue/chart';
 import Tag from 'primevue/tag';
+import useRole from '@/composables/useRole';
+import { usePage } from '@inertiajs/vue3';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,6 +17,19 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
 ];
+
+console.log(usePage().props.auth);
+
+const { hasRole } = useRole();
+
+if (hasRole('Admin')) {
+    console.log('User is an Admin');
+}
+else if (hasRole('Petugas')) {
+    console.log('User is a Petugas');
+} else {
+    console.log('User has no specific role');
+}
 
 function goToBooks() {
     router.visit('/books');
