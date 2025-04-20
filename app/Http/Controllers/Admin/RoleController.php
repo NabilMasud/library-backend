@@ -22,6 +22,13 @@ class RoleController extends Controller
         return back()->with('success', 'Role berhasil dibuat.');
     }
 
+    public function update(Request $request, Role $role)
+    {
+        $request->validate(['name' => 'required|unique:roles,name,' . $role->id]);
+        $role->update(['name' => $request->name]);
+        return back()->with('success', 'Role berhasil diperbarui.');
+    }
+
     public function destroy(Role $role)
     {
         $role->delete();

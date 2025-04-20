@@ -25,10 +25,13 @@ Route::group(['middleware' => ['auth', 'verified', 'role:Admin|Petugas']], funct
     Route::resource('/books', BookController::class)->except(['create', 'show', 'store']);
 });
 
-Route::middleware(['auth', 'role:Admin'])->group(function () {
-    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+Route::middleware(['auth', 'role:Admin|Petugas'])->group(function () {
+    Route::middleware(['auth', 'role:Admin'])->group(function () {
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    });
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}/roles', [UserController::class, 'updateRoles'])->name('users.updateRoles');
