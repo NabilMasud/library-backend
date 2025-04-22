@@ -40,6 +40,11 @@ const mainNavItems: NavItem[] = [
             },
         ]
         : []),
+    {
+        title: 'Permissions',
+        href: '/permissions',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

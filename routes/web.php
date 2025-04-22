@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -31,10 +32,14 @@ Route::middleware(['auth', 'role:Admin|Petugas'])->group(function () {
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
         Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
         Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        Route::resource('permissions', PermissionController::class);
+        Route::put('/permissions/{permission}/users', [PermissionController::class, 'updateUsers'])->name('permissions.updateUsers');
+        Route::put('/permissions/{permission}/roles', [PermissionController::class, 'updateRoles'])->name('permissions.updateRoles');
     });
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}/roles', [UserController::class, 'updateRoles'])->name('users.updateRoles');
+    Route::put('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.updatePermissions');
 });
 
 

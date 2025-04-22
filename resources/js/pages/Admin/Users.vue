@@ -5,11 +5,7 @@ import Column from 'primevue/column';
 import { Head } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import Heading from '@/components/Heading.vue';
-import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
 import MultiSelect from 'primevue/multiselect';
-import Dropdown from 'primevue/dropdown';
-import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
@@ -31,6 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 defineProps<{
     users: any[],
     roles: { name: string }[],
+    permissions: { name: string }[],
 }>();
 
 // function editRoles(user: any) {
@@ -50,6 +47,7 @@ function submitRoles(id : Number, roles: string[]) {
             detail: 'Petugas tidak dapat memberikan peran Admin kepada pengguna lain.',
             life: 3000,
         });
+        router.reload({ only: ['users', 'roles', 'permissions'] });
         return;
 
     }
@@ -77,6 +75,30 @@ function submitRoles(id : Number, roles: string[]) {
         },
     });
 }
+
+function submitPermissions(id: Number, permissions: string[]) {
+    router.put(`/users/${id}/permissions`, { permissions }, {
+        onSuccess: () => {
+            toast.add({
+                severity: 'success',
+                summary: 'Berhasil',
+                detail: 'Izin pengguna berhasil diperbarui.',
+                life: 3000,
+            });
+        },
+        onError: (errors) => {
+            const allErrors = Object.values(errors).flat();
+            allErrors.forEach((error: string) => {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Gagal',
+                    detail: error,
+                    life: 3000,
+                });
+            });
+        },
+    });
+}
 </script>
 
 <template>
@@ -84,7 +106,7 @@ function submitRoles(id : Number, roles: string[]) {
     <AppLayout :breadcrumbs="breadcrumbs">
         <Toast position="top-right" />
         <div class="px-4 py-6">
-            <Heading title="Daftar Pengguna" description="Berikut adalah daftar pengguna dan perannya." />
+            <Heading title="Daftar Pengguna" description="Berikut adalah daftar pengguna, peran, dan izinnya." />
 
             <div class="flex flex-1 flex-col gap-4 rounded-xl p-4">
                 <div
@@ -93,18 +115,10 @@ function submitRoles(id : Number, roles: string[]) {
                         :rowsPerPageOptions="[5, 10, 20, 50]">
                         <Column field="name" sortable header="Nama"></Column>
                         <Column field="email" header="Email"></Column>
-                        <!-- <Column header="Peran">
-                            <template #body="slotProps">
-                                <span v-for="role in slotProps.data.roles" :key="role.id" class="mr-2">
-                                    <span :class="'px-2 py-1 text-sm rounded text-white ' + (role.name == 'Admin' ? 'bg-green-500' : 'bg-blue-500')">{{ role.name }}</span>
-                                </span>
-                                <span v-if="slotProps.data.roles.length === 0" class="px-2 py-1 text-sm rounded bg-gray-500 text-white">Pengunjung</span>
-                            </template>
-                        </Column> -->
+
+                        <!-- Kolom Manajemen Role -->
                         <Column header="Peran">
                             <template #body="slotProps">
-                                <!-- <Button label="Edit Peran" icon="pi pi-pencil" @click="editRoles(slotProps.data)"
-                                    class="p-button-sm" /> -->
                                 <MultiSelect
                                     :options="roles"
                                     optionLabel="name"
@@ -141,27 +155,47 @@ function submitRoles(id : Number, roles: string[]) {
                                 </MultiSelect>
                             </template>
                         </Column>
+
+                        <!-- Kolom Manajemen Permission -->
+                        <Column header="Izin">
+                            <template #body="slotProps">
+                                <MultiSelect
+                                    :options="permissions"
+                                    optionLabel="name"
+                                    optionValue="name"
+                                    :modelValue="slotProps.data.permissions.map((permission: any) => permission.name)"
+                                    placeholder="Pilih Izin"
+                                    display="chip"
+                                    :diasbled="!hasRole('Admin')"
+                                    class="w-50"
+                                    @change="(e) => submitPermissions(slotProps.data.id, e.value)"
+                                >
+                                    <template #option="slotOption">
+                                        <span
+                                            :class="[
+                                                'px-2 py-1 text-sm rounded text-white',
+                                                'bg-purple-500'
+                                            ]"
+                                        >
+                                            {{ slotOption.option.name }}
+                                        </span>
+                                    </template>
+                                    <template #chip="slotChip">
+                                        <span
+                                            :class="[
+                                                'px-2 py-1 text-sm rounded text-white mr-1',
+                                                'bg-purple-500'
+                                            ]"
+                                        >
+                                            {{ slotChip.value }}
+                                        </span>
+                                    </template>
+                                </MultiSelect>
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
             </div>
-
-            <!-- Modal Edit Peran -->
-            <!-- <Dialog header="Edit Peran Pengguna" v-model:visible="showModal" modal class="w-[30rem]">
-                <div class="flex flex-col gap-4">
-                    <div>
-                        <label>Nama Pengguna</label>
-                        <InputText :value="selectedUser?.value?.name" class="w-full" disabled />
-                    </div>
-                    <div>
-                        <label>Pilih Peran</label>
-                        <MultiSelect v-model="selectedRoles" :options="(roles ?? []).map(role => role.name)" class="w-full" />
-                    </div>
-                </div>
-                <template #footer>
-                    <Button label="Batal" severity="secondary" @click="showModal = false" />
-                    <Button label="Simpan" @click="submitRoles" />
-                </template>
-            </Dialog> -->
         </div>
     </AppLayout>
 </template>
