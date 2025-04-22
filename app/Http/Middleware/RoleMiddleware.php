@@ -18,10 +18,15 @@ class RoleMiddleware
     {
         if (! $request->user() || ! $request->user()->hasAnyRole($roles)) {
             if ($request->header('X-Inertia')) {
-                return Inertia::render('Errors/403')->toResponse($request)->setStatusCode(403);
+                return Inertia::render('Errors/403', [
+                    'message' => 'Anda tidak memiliki izin untuk mengakses halaman ini',
+                ])->toResponse($request)->setStatusCode(403);
             }
+            return Inertia::render('Errors/403', [
+                'message' => 'Anda tidak memiliki izin untuk mengakses halaman ini',
+            ])->toResponse($request)->setStatusCode(403);
 
-            abort(403);
+            abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini');
         }
         return $next($request);
     }
