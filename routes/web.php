@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'role:Admin|Petugas'])->group(function () {
         Route::resource('permissions', PermissionController::class);
         Route::put('/permissions/{permission}/users', [PermissionController::class, 'updateUsers'])->name('permissions.updateUsers');
         Route::put('/permissions/{permission}/roles', [PermissionController::class, 'updateRoles'])->name('permissions.updateRoles');
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -43,5 +45,5 @@ Route::middleware(['auth', 'role:Admin|Petugas'])->group(function () {
 });
 
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

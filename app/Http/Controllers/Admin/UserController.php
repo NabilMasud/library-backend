@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
@@ -42,6 +43,12 @@ class UserController extends Controller
         ]);
 
         $user->syncPermissions($request->permissions);
+
+        activity()
+        ->causedBy(Auth::user())
+        ->performedOn($user)
+        ->withProperties(['permissions' => $request->permissions])
+        ->log("Updated '" . implode(', ', $request->permissions) . "' for user '{$user->name}'");
 
         return back()->with('success', 'Izin pengguna berhasil diperbarui.');
     }

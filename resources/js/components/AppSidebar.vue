@@ -38,13 +38,18 @@ const mainNavItems: NavItem[] = [
                 href: '/roles',
                 icon: LayoutGrid,
             },
+            {
+                title: 'Permissions',
+                href: '/permissions',
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Activity Logs',
+                href: '/activity-logs',
+                icon: LayoutGrid,
+            },
         ]
         : []),
-    {
-        title: 'Permissions',
-        href: '/permissions',
-        icon: LayoutGrid,
-    },
 ];
 
 const footerNavItems: NavItem[] = [
