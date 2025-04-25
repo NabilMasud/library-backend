@@ -5,6 +5,25 @@ import Column from 'primevue/column';
 import { Head } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import Heading from '@/components/Heading.vue';
+import Tree from 'primevue/tree';
+
+// Helper function to convert an object to PrimeVue Tree node format
+function objectToTreeNodes(obj: Record<string, any>): any[] {
+    return Object.entries(obj).map(([key, value]) => {
+        if (typeof value === 'object' && value !== null) {
+            return {
+                key,
+                label: key,
+                children: objectToTreeNodes(value)
+            };
+        } else {
+            return {
+                key,
+                label: `${value}`
+            };
+        }
+    });
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,7 +46,6 @@ defineProps<{
     }[];
 }>();
 </script>
-
 <template>
     <Head title="Log Aktivitas" />
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -45,12 +63,14 @@ defineProps<{
                         <Column field="causer.name" header="Causer"></Column>
                         <Column header="Properties">
                             <template #body="slotProps">
-                                <pre class="whitespace-pre-wrap text-sm">
-                                    {{ JSON.stringify(slotProps.data.properties, null, 2) }}
-                                </pre>
+                                <Tree :value="objectToTreeNodes(slotProps.data.properties)" />
                             </template>
                         </Column>
-                        <Column field="created_at" header="Created At" sortable></Column>
+                        <Column field="created_at" header="Date" sortable>
+                            <template #body="slotProps">
+                                {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
             </div>
