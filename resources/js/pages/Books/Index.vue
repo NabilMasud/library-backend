@@ -21,8 +21,7 @@ import Tag from 'primevue/tag';
 import Divider from 'primevue/divider';
 
 import { router } from '@inertiajs/vue3';
-
-import { ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 
 const showModal = ref(false);
 const isEditing = ref(false)
@@ -220,9 +219,62 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 ];
 
-defineProps({
-    books: Array
+const props = defineProps({
+    books: Array,
+    current_page: Number,
+    total: Number,
+    per_page: Number,
 })
+
+// Cache untuk menyimpan data buku
+const cache = reactive(new Map<string, any>());
+const currentPage = ref(1);
+const loading = ref(false);
+
+// Inisialisasi cache dengan data awal
+cache.set(String(currentPage.value), props.books);
+
+// Jumlah halaman maksimum yang disimpan di cache
+const maxCachePages = 2;
+
+// Fungsi untuk menangani perubahan halaman
+const onPageChange = (event: any) => {
+    const newPage = (event.page ?? 0) + 1;
+
+    // Jika data halaman baru sudah ada di cache, gunakan data tersebut
+    if (cache.has(String(newPage))) {
+        currentPage.value = newPage;
+        return;
+    }
+
+    // Jika tidak ada di cache, ambil data dari backend
+    loading.value = true;
+    router.get(route('books.index', { page: newPage }), {}, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['books', 'current_page', 'total', 'per_page'], // Hanya ambil data yang diperlukan
+        onSuccess: (page) => {
+            // Tambahkan data halaman baru ke cache
+            cache.set(String(newPage), page.props.books);
+            currentPage.value = newPage;
+
+            // Hapus halaman tertua dari cache jika cache melebihi batas
+            if (cache.size > maxCachePages) {
+                const oldestPage = Array.from(cache.keys())[0];
+                cache.delete(oldestPage);
+            }
+        },
+        onFinish: () => {
+            loading.value = false;
+        },
+    });
+};
+
+// Data buku untuk halaman saat ini
+const booksData = computed(() => {
+    return cache.get(String(currentPage.value)) || [];
+});
+
 </script>
 
 <template>
@@ -237,8 +289,8 @@ defineProps({
                 <Button label="Tambah Buku" icon="pi pi-plus" @click="tambahBuku" variant="outlined" class="w-48" />
                 <div
                     class="relative  flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                    <DataTable :value="books" removableSort paginator :rows="10" responsiveLayout="scroll"
-                        :rowsPerPageOptions="[5, 10, 20, 50]">
+                    <DataTable :value="booksData" removableSort paginator :rows="10" responsiveLayout="scroll"
+                        :lazy="true" :totalRecords="props.total" :loading="loading" :first="(currentPage - 1) * 10" :onPage="onPageChange">
                         <Column field="judul" sortable header="Judul"></Column>
                         <Column field="pengarang" header="Pengarang"></Column>
                         <Column field="penerbit" header="Penerbit"></Column>

@@ -18,8 +18,13 @@ class BookController extends Controller
                 'url' => self::UrlBooks,
             ])->toResponse(request())->setStatusCode(403);
         }
+
+        $books = Book::latest()->paginate(10);
         return Inertia::render('Books/Index', [
-            'books' => Book::latest()->get()
+            'books' => $books->items(),          // Data per halaman
+            'current_page' => $books->currentPage(),  // Halaman sekarang
+            'total' => $books->total(),          // Total semua data
+            'per_page' => $books->perPage(),     // Banyak data per halaman
         ]);
     }
 

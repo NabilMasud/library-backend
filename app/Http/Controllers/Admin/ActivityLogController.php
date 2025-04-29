@@ -11,7 +11,7 @@ class ActivityLogController extends Controller
     public function index()
     {
         // Ambil data log aktivitas dari database
-        $logs = Activity::with('causer', 'subject')->latest()->paginate(25);
+        $logs = Activity::with('causer', 'subject')->latest()->paginate(5);
 
         return Inertia::render('Admin/ActivityLogs', [
             'logs' => $logs->items(),          // Data per halaman
