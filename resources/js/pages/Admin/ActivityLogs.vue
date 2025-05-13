@@ -8,6 +8,9 @@ import Heading from '@/components/Heading.vue';
 import Tree from 'primevue/tree';
 import { router } from '@inertiajs/vue3';
 import { reactive, ref, computed } from 'vue';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
+import Calendar from 'primevue/calendar';
 
 // Helper function to convert an object to PrimeVue Tree node format
 function objectToTreeNodes(obj: Record<string, any>): any[] {
@@ -60,28 +63,56 @@ cache.set(String(currentPage.value), props.logs);
 // Maximum number of pages to keep in cache
 const maxCachePages = 2;
 
+// Filters for search
+const filters = reactive({
+    log_name: '',
+    causer: '',
+    start_date: '',
+    end_date: '',
+});
+
+// Apply filters and fetch data from backend
+const applyFilters = () => {
+    loading.value = true;
+    router.get(route('activity-logs.index'), {
+        page: 1,
+        ...filters,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['logs', 'current_page', 'total', 'per_page'],
+        onSuccess: (page) => {
+            cache.clear(); // Clear cache for new filters
+            cache.set(String(1), page.props.logs);
+            currentPage.value = 1;
+        },
+        onFinish: () => {
+            loading.value = false;
+        },
+    });
+};
+
 // Handle page change
 const onPageChange = (event: any) => {
     const newPage = (event.page ?? 0) + 1;
 
-    // If the data for the new page is already in cache, just update the current page
+// If the data for the new page is already in cache, just update the current page
+// If the data for the new page is already in cache, just update the current page
+// If the data for the new page is already in cache, just update the current page
     if (cache.has(String(newPage))) {
         currentPage.value = newPage;
         return;
     }
 
-    // Otherwise, fetch data for the new page
     loading.value = true;
-    router.get(route('activity-logs.index', { page: newPage }), {}, {
+    router.get(route('activity-logs.index', { page: newPage, ...filters }), {}, {
         preserveState: true,
         preserveScroll: true,
-        only: ['logs', 'current_page', 'total', 'per_page'], // Fetch only necessary data
+        only: ['logs', 'current_page', 'total', 'per_page'],
         onSuccess: (page) => {
-            // Add new page data to cache
             cache.set(String(newPage), page.props.logs);
             currentPage.value = newPage;
 
-            // Remove the oldest page from cache if cache size exceeds the limit
             if (cache.size > maxCachePages) {
                 const oldestPage = Array.from(cache.keys())[0];
                 cache.delete(oldestPage);
@@ -104,6 +135,30 @@ const activitiesData = computed(() => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="px-4 py-6">
             <Heading title="Log Aktivitas" description="Berikut adalah daftar log aktivitas sistem." />
+
+            <!-- Filter Section -->
+            <div class="mb-4 flex gap-4">
+                <InputText
+                    v-model="filters.log_name"
+                    placeholder="Filter Log Name"
+                />
+                <InputText
+                    v-model="filters.causer"
+                    placeholder="Filter Causer"
+                />
+                <Calendar
+                    :v-model="filters.start_date"
+                    placeholder="Start Date"
+                />
+                <Calendar
+                    :v-model="filters.end_date"
+                    placeholder="End Date"
+                />
+                <Button
+                    @click="applyFilters"
+                    label="Cari"
+                />
+            </div>
 
             <div class="flex flex-1 flex-col gap-4 rounded-xl p-4">
                 <div
