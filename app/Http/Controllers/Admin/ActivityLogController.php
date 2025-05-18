@@ -28,6 +28,10 @@ class ActivityLogController extends Controller
         // Filter berdasarkan rentang tanggal
         if ($request->start_date && $request->end_date) {
             $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        } elseif ($request->start_date) {
+            $query->where('created_at', '>=', $request->start_date);
+        } elseif ($request->end_date) {
+            $query->where('created_at', '<=', $request->end_date);
         }
 
         $logs = $query->paginate(5);

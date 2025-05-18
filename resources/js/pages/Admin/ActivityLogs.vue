@@ -67,16 +67,25 @@ const maxCachePages = 2;
 const filters = reactive({
     log_name: '',
     causer: '',
-    start_date: '',
-    end_date: '',
+    start_date: null as Date | null,
+    end_date: null as Date | null,
 });
+
+const formatDate = (date: any) => {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+};
 
 // Apply filters and fetch data from backend
 const applyFilters = () => {
     loading.value = true;
     router.get(route('activity-logs.index'), {
         page: 1,
-        ...filters,
+        log_name: filters.log_name,
+        causer: filters.causer,
+        start_date: formatDate(filters.start_date),
+        end_date: formatDate(filters.end_date),
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -96,16 +105,22 @@ const applyFilters = () => {
 const onPageChange = (event: any) => {
     const newPage = (event.page ?? 0) + 1;
 
-// If the data for the new page is already in cache, just update the current page
-// If the data for the new page is already in cache, just update the current page
-// If the data for the new page is already in cache, just update the current page
+    // If the data for the new page is already in cache, just update the current page
+    // If the data for the new page is already in cache, just update the current page
+    // If the data for the new page is already in cache, just update the current page
     if (cache.has(String(newPage))) {
         currentPage.value = newPage;
         return;
     }
 
     loading.value = true;
-    router.get(route('activity-logs.index', { page: newPage, ...filters }), {}, {
+    router.get(route('activity-logs.index'), {
+        page: newPage,
+        log_name: filters.log_name,
+        causer: filters.causer,
+        start_date: formatDate(filters.start_date),
+        end_date: formatDate(filters.end_date),
+    }, {
         preserveState: true,
         preserveScroll: true,
         only: ['logs', 'current_page', 'total', 'per_page'],
@@ -131,6 +146,7 @@ const activitiesData = computed(() => {
 </script>
 
 <template>
+
     <Head title="Log Aktivitas" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="px-4 py-6">
@@ -138,43 +154,26 @@ const activitiesData = computed(() => {
 
             <!-- Filter Section -->
             <div class="mb-4 flex gap-4">
-                <InputText
-                    v-model="filters.log_name"
-                    placeholder="Filter Log Name"
-                />
-                <InputText
-                    v-model="filters.causer"
-                    placeholder="Filter Causer"
-                />
-                <Calendar
-                    :v-model="filters.start_date"
-                    placeholder="Start Date"
-                />
-                <Calendar
-                    :v-model="filters.end_date"
-                    placeholder="End Date"
-                />
-                <Button
-                    @click="applyFilters"
-                    label="Cari"
-                />
+                <InputText v-model="filters.log_name" placeholder="Filter Log Name" />
+                <InputText v-model="filters.causer" placeholder="Filter Causer" />
+                <Calendar v-model="filters.start_date" date-format="yy-mm-dd" placeholder="Start Date" />
+                <Calendar v-model="filters.end_date" date-format="yy-mm-dd" placeholder="End Date" />
+                <Button label="Reset" severity="secondary" @click="() => {
+                    filters.log_name = '';
+                    filters.causer = '';
+                    filters.start_date = null;
+                    filters.end_date = null;
+                    applyFilters();
+                }" />
+                <Button @click="applyFilters" label="Cari" />
             </div>
 
             <div class="flex flex-1 flex-col gap-4 rounded-xl p-4">
                 <div
                     class="relative flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                    <DataTable
-                        :value="activitiesData"
-                        removableSort
-                        paginator
-                        :rows="5"
-                        responsiveLayout="scroll"
-                        :lazy="true"
-                        :totalRecords="props.total"
-                        :loading="loading"
-                        :first="(currentPage - 1) * 5"
-                        @page="onPageChange"
-                    >
+                    <DataTable :value="activitiesData" removableSort paginator :rows="5" responsiveLayout="scroll"
+                        :lazy="true" :totalRecords="props.total" :loading="loading" :first="(currentPage - 1) * 5"
+                        @page="onPageChange">
                         <Column field="log_name" header="Log Name" sortable></Column>
                         <Column field="description" header="Description" sortable></Column>
                         <Column field="subject.name" header="Subject"></Column>

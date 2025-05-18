@@ -17,7 +17,7 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
-    ...(hasRole('Petugas')
+    ...(hasRole('Petugas') || hasRole('Admin')
         ? [
             {
                 title: 'Books',
