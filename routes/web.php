@@ -42,7 +42,14 @@ Route::middleware(['auth', 'role:Admin|Petugas'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}/roles', [UserController::class, 'updateRoles'])->name('users.updateRoles');
     Route::put('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.updatePermissions');
+    Route::get('/activity-logs/export-excel', [ActivityLogController::class, 'exportExcel'])
+        ->name('activity-logs.export-excel');
+    
+    Route::get('/activity-logs/export-pdf', [ActivityLogController::class, 'exportPDF'])
+        ->name('activity-logs.export-pdf');
 });
+
+
 
 
 require __DIR__ . '/settings.php';

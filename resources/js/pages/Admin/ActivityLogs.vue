@@ -139,6 +139,18 @@ const onPageChange = (event: any) => {
     });
 };
 
+// Export to Excel
+const exportToExcel = () => {
+    const params = new URLSearchParams(filters as any).toString();
+    window.open(route('activity-logs.export-excel') + '?' + params, '_blank');
+};
+
+// Export to PDF
+const exportToPDF = () => {
+    const params = new URLSearchParams(filters as any).toString();
+    window.open(route('activity-logs.export-pdf') + '?' + params, '_blank');
+};
+
 // Computed property to get the data for the current page
 const activitiesData = computed(() => {
     return cache.get(String(currentPage.value)) || [];
@@ -151,6 +163,10 @@ const activitiesData = computed(() => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="px-4 py-6">
             <Heading title="Log Aktivitas" description="Berikut adalah daftar log aktivitas sistem." />
+            <div class="flex justify-end gap-2 pb-4">
+                <Button label="Export Excel" @click="exportToExcel" />
+                <Button label="Export PDF" @click="exportToPDF" />
+            </div>
 
             <!-- Filter Section -->
             <div class="mb-4 flex gap-4">
